@@ -1,6 +1,7 @@
 package com.example.testdemo.Demo;
 
 import com.example.testdemo.Demo.dto.DemoDto;
+import com.example.testdemo.System.Exception.ObjectNotFoundException;
 import com.example.testdemo.System.StatusCode;
 import com.example.testdemo.artifact.Artifact;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -88,9 +89,6 @@ public class DemoControllerTest {
         d3.addArtifact(a2);
         this.demos.add(d3);
 
-
-
-
     }
 
     @AfterEach
@@ -131,12 +129,12 @@ public class DemoControllerTest {
         given(this.demoService.findAll()).willReturn(this.demos);
 
         // whrn and then
-        this.mockMvc.perform(get("api/V1/demos").accept(MediaType.APPLICATION_JSON))
+        this.mockMvc.perform(get("/api/V1/demos").accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.flag").value(true))
                 .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
                 .andExpect(jsonPath("$.message").value(" find ll Success "))
                 .andExpect(jsonPath("$.data", Matchers.hasSize(this.demos.size())))
-                .andExpect(jsonPath("$.data(0).id").value(" 1250808601744904191 "))
+                .andExpect(jsonPath("$.data(0).id").value(" 1250808601744904192 "))
                 .andExpect(jsonPath("$.data(0).name").value(" Deluminator "))
                 .andExpect(jsonPath("$.data(1).id").value(" 1250808601744904191 "))
                 .andExpect(jsonPath("$.data(1).name").value(" Invisibility Cloak "));
@@ -157,7 +155,7 @@ public class DemoControllerTest {
 
 
         //WHen and Then
-        this.mockMvc.perform(post("api/V1/demos").contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON))
+        this.mockMvc.perform(post("/api/V1/demos").contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.flag").value(true))
                 .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
                 .andExpect(jsonPath("$.message").value(" ADD Success "))
@@ -178,7 +176,7 @@ public class DemoControllerTest {
 
 
         //WHen and Then
-        this.mockMvc.perform(put("api/V1/demos/1").contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON))
+        this.mockMvc.perform(put("/api/V1/demos/1").contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.flag").value(true))
                 .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
                 .andExpect(jsonPath("$.message").value(" UPDATE Success "))
@@ -195,7 +193,7 @@ public class DemoControllerTest {
 
 
         //WHen and Then
-        this.mockMvc.perform(put("api/V1/demos/1").contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON))
+        this.mockMvc.perform(put("/api/V1/demos/1").contentType(MediaType.APPLICATION_JSON).content(json).accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.flag").value(false))
                 .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
                 .andExpect(jsonPath("$.message").value(" UPDATE Not Success "))
@@ -207,7 +205,7 @@ public class DemoControllerTest {
     void testDeleteDemosSuccess() throws Exception {
         doNothing().when(this.demoService).delete(1);
 
-        this.mockMvc.perform(delete("api/V1/demos/1").accept(MediaType.APPLICATION_JSON))
+        this.mockMvc.perform(delete("/api/V1/demos/1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.flag").value(true))
                 .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
                 .andExpect(jsonPath("$.message").value(" Delete Success "))
@@ -217,12 +215,49 @@ public class DemoControllerTest {
     void testDeleteDemosErrorWhitNonExistentId() throws Exception {
         doThrow(new DemoNotFoundException(1)).when(this.demoService).delete(1);
 
-        this.mockMvc.perform(delete("api/V1/demos /1").accept(MediaType.APPLICATION_JSON))
+        this.mockMvc.perform(delete("/api/V1/demos/1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.flag").value(false))
                 .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
-                .andExpect(jsonPath("$.message").value(" Delete Not  Success whit id 1250808601744904191 "))
+                .andExpect(jsonPath("$.message").value(" Delete Not  Success whit id 1250808601744904192"))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
+
+    @Test
+    void  testAssignArtifactSuccess() throws Exception {
+        doNothing().when(this.demoService).assignArtifact(2 , "1250808601744904192" );
+        this.mockMvc.perform(put("/demos/2/artifacts/1250808601744904192").accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("  Artifact Assignment  Success "))
+                .andExpect(jsonPath("$.data").isEmpty());
+
+
+    }
+    @Test
+    void  testAssignArtifactErrorWithNonExistentDemoId() throws Exception {
+            doThrow(new ObjectNotFoundException("demo" , 2 )).when(this.demoService).assignArtifact(2 , "1250808601744904192");
+            this.mockMvc.perform(put("/demos/2/artifacts/1250808601744904192").accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
+                .andExpect(jsonPath("$.message").value("  Could not find demo  "))
+                .andExpect(jsonPath("$.data").isEmpty());
+
+
+    }
+    @Test
+    void  testAssignArtifactErrorWithNonExistentArtifactId() throws Exception {
+        doThrow(new ObjectNotFoundException("artifact" , 99 )).when(this.demoService).assignArtifact(2 , "1250808601744904199");
+        this.mockMvc.perform(put("/demos/2/artifacts/1250808601744904199").accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
+                .andExpect(jsonPath("$.message").value("  Could not find artifact   "))
+                .andExpect(jsonPath("$.data").isEmpty());
+
+
+    }
+
+
+
 
 
 }

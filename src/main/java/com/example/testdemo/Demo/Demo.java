@@ -43,4 +43,10 @@ public class Demo implements Serializable {
         this.artfacts.stream().forEach(artifact -> artifact.setOwner(null));
         this.artfacts = null ;
     }
+
+    public void removeArtifact(Artifact artifactToBeAssigned) {
+        artifactToBeAssigned.setOwner(null);
+        this.artfacts.remove(artifactToBeAssigned);
+
+    }
 }

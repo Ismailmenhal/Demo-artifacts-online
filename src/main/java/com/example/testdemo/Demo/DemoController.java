@@ -63,4 +63,10 @@ public class DemoController {
         return new Result(true , (long) StatusCode.SUCCESS, " Delete  Success " );
 
     }
+
+    @PutMapping("/{demoId}/artifacts/{artifactId}")
+    public Result assignArtifact(@PathVariable Integer demoId ,@PathVariable String artifactId ){
+        this.demoService.assignArtifact(demoId , artifactId);
+        return new Result(true , (long) StatusCode.SUCCESS, " Artifact Assignment  Success " );
+    }
 }
