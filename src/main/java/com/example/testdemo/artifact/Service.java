@@ -1,14 +1,14 @@
 package com.example.testdemo.artifact;
 
 
+import com.example.testdemo.System.Exception.ObjectNotFoundException;
 import com.example.testdemo.artifact.utils.IdWorker;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
 
-@org.springframework.stereotype.Service
 @Transactional
-
+@org.springframework.stereotype.Service
 public class Service {
 
     private final Repository artifactRepository;
@@ -21,9 +21,9 @@ public class Service {
     }
 
     public Artifact findById(String artifactId) {
-        return this.artifactRepository
-                .findById(artifactId)
-                .orElseThrow(() -> new ArtifactNotFoundException(artifactId));
+        return this.artifactRepository.findById(artifactId)
+                .orElseThrow(() -> new ObjectNotFoundException("Could not find " + artifactId ));
+
     }
 
     public List<Artifact> findAll() {
@@ -44,13 +44,13 @@ public class Service {
                             oldArtifact.setImageUrl(update.getImageUrl());
                             return this.artifactRepository.save(oldArtifact);
                         })
-                .orElseThrow(() -> new ArtifactNotFoundException(artifactId));
+                .orElseThrow(() -> new ObjectNotFoundException("Could not find " + artifactId ));
 
     }
 
     public void delete(String artifactId){
        this.artifactRepository.findById(artifactId)
-               .orElseThrow(()-> new ArtifactNotFoundException(artifactId));
+               .orElseThrow(() -> new ObjectNotFoundException("Could not find " + artifactId ));
         this.artifactRepository.deleteById(artifactId);
 
     }

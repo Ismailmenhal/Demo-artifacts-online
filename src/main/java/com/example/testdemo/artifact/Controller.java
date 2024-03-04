@@ -1,6 +1,6 @@
 package com.example.testdemo.artifact;
 
-import com.example.testdemo.Demo.Converter.ArtifactDtoToArtifactConverter;
+import com.example.testdemo.Demo.Converter.DemoDtoToDemoConverter;
 import com.example.testdemo.System.Result;
 import com.example.testdemo.System.StatusCode;
 import com.example.testdemo.artifact.Converter.ArtifactToArtifactDtoConverter;
@@ -8,20 +8,19 @@ import com.example.testdemo.artifact.dto.ArtifactDto;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
-import javax.print.attribute.ResolutionSyntax;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/artifacts")
+@RequestMapping(" ${api.endpoint.base-url}/artifacts")
 
 
 public class Controller {
     private final  Service artifactService;
     private  final ArtifactToArtifactDtoConverter artifactToArtifactDtoConverter ;
-    private final ArtifactDtoToArtifactConverter artifactDtoToArtifactConverter;
+    private final DemoDtoToDemoConverter artifactDtoToArtifactConverter;
 
-    public Controller(Service artifactService, ArtifactToArtifactDtoConverter artifactToArtifactDtoConverter, ArtifactDtoToArtifactConverter artifactDtoToArtifactConverter) {
+    public Controller(Service artifactService, ArtifactToArtifactDtoConverter artifactToArtifactDtoConverter, DemoDtoToDemoConverter artifactDtoToArtifactConverter) {
         this.artifactService = artifactService;
         this.artifactToArtifactDtoConverter = artifactToArtifactDtoConverter;
         this.artifactDtoToArtifactConverter = artifactDtoToArtifactConverter;
@@ -46,8 +45,6 @@ public class Controller {
     }
     @PostMapping
     public Result addArtifact(@Valid @RequestBody ArtifactDto artifactDto){
-
-
        Artifact newArtifact =  this.artifactDtoToArtifactConverter.convert(artifactDto);
        Artifact savedArtifact = this.artifactService.save(newArtifact);
        ArtifactDto savedArtifactDto = this.artifactToArtifactDtoConverter.convert(savedArtifact);
