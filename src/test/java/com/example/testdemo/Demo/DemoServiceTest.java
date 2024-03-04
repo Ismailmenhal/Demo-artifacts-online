@@ -1,5 +1,8 @@
 package com.example.testdemo.Demo;
 
+import com.example.testdemo.System.Exception.ObjectNotFoundException;
+import com.example.testdemo.artifact.Artifact;
+import com.example.testdemo.artifact.Repository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +25,9 @@ public class DemoServiceTest {
 
     @Mock
     DemoRepository demoRepository;
+
+    @Mock
+    Repository repository ;
 
     @InjectMocks
     DemoService demoService;
@@ -192,6 +198,83 @@ public class DemoServiceTest {
 
         //Then
         verify(this.demoRepository, times(1)).findById(1);
+
+    }
+    @Test
+    void testAssignArtifactSuccess (){
+        //Given
+        Artifact a = new Artifact();
+        a.setId("1250808601744904192");
+        a.setName("Deluminator");
+        a.setDescription(" A Deluminator is a device ....");
+        a.setImageUrl("imageUrl");
+
+
+        Demo d2= new Demo();
+        d2.setId(2);
+        d2.setName("Ismail");
+
+        Demo d3 = new Demo();
+        d3.setId(3);
+        d3.setName("KIKa");
+
+        given(this.repository.findById("1250808601744904192")).willReturn(Optional.of(a));
+        given(this.demoRepository.findById(3)).willReturn(Optional.of(d2));
+
+        //When
+        this.demoService.assignArtifact(3 , "1250808601744904192");
+
+        //THen
+        assertThat(a.getOwner().getId()).isEqualTo(3);
+        assertThat(d2.getArtifacts().contains(a));
+
+
+    }
+    @Test
+    void testAssignArtifactErrorWithNonExistentDemoId(){
+        //Given
+        Artifact a = new Artifact();
+        a.setId("1250808601744904192");
+        a.setName("Deluminator");
+        a.setDescription(" A Deluminator is a device ....");
+        a.setImageUrl("imageUrl");
+
+
+        Demo d2= new Demo();
+        d2.setId(2);
+        d2.setName("Ismail");
+
+
+        given(this.repository.findById("1250808601744904192")).willReturn(Optional.of(a));
+        given(this.demoRepository.findById(3)).willReturn(Optional.empty());
+
+        //When
+        Throwable thrown = assertThrows(ObjectNotFoundException.class , ()-> {
+            this.demoService.assignArtifact(3 , "1250808601744904192");
+        });
+
+        //THen
+        assertThat(thrown)
+                .isInstanceOf(ObjectNotFoundException.class)
+                        .hasMessage("Could not find demo whit Id 3 ");
+        assertThat(a.getOwner().getId()).isEqualTo(2);
+
+    }
+    @Test
+    void testAssignArtifactErrorWithNonExistentArtifactId(){
+        //Given
+
+        given(this.repository.findById("1250808601744904192")).willReturn(Optional.empty());
+
+        //When
+        Throwable thrown = assertThrows(ObjectNotFoundException.class , ()-> {
+            this.demoService.assignArtifact(3 , "1250808601744904192");
+        });
+
+        //THen
+        assertThat(thrown)
+                .isInstanceOf(ObjectNotFoundException.class)
+                .hasMessage("Could not find artifact whit Id 1250808601744904192 ");
 
     }
 }

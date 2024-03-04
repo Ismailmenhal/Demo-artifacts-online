@@ -1,6 +1,8 @@
 package com.example.testdemo.Demo;
 
-import com.example.testdemo.artifact.utils.IdWorker;
+import com.example.testdemo.System.Exception.ObjectNotFoundException;
+import com.example.testdemo.artifact.Artifact;
+import com.example.testdemo.artifact.Repository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +12,13 @@ import java.util.List;
 @Service
 public class DemoService {
     private  final  DemoRepository demoRepository ;
+    private  final Repository repository ;
 
-    public DemoService(DemoRepository demoRepository, IdWorker idWorker) {
+    public DemoService(DemoRepository demoRepository, Repository repository) {
         this.demoRepository = demoRepository;
-
+        this.repository = repository;
     }
+
 
     public Demo findById(Integer demoId) {
             return this.demoRepository
@@ -45,4 +49,20 @@ public class DemoService {
     demoToBeDeleted.removeAllArtifacts();
     this.demoRepository.deleteById(demoId);
     }
+
+    public  void assignArtifact(Integer demoId , String artifactId ){
+
+        Artifact artifactToBeAssigned = this.repository.findById(artifactId).orElseThrow(()-> new ObjectNotFoundException("artifact"));
+
+        Demo demo = this.demoRepository.findById(demoId).orElseThrow(()-> new ObjectNotFoundException("demo"));
+
+        if ( artifactToBeAssigned.getOwner() != null){
+            artifactToBeAssigned.getOwner().removeArtifact(artifactToBeAssigned);
+        }
+
+        demo.addArtifact(artifactToBeAssigned);
+
+
+    }
+
 }
